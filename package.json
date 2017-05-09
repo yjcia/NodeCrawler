@@ -1,0 +1,21 @@
+{
+  "name": "node_crawler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.4.0",
+    "cheerio": "^0.22.0",
+    "https": "^1.0.0",
+    "log4js": "^1.1.1",
+    "moment": "^2.18.1",
+    "mssql": "^4.0.4",
+    "mysql": "^2.13.0",
+    "request": "^2.81.0"
+  }
+}
