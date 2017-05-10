@@ -229,7 +229,14 @@ function analysisScreenshot(crawlerUrl,batchTime,item){
                 }
             });
         });
-        c.connect({host:'101.231.74.130',port:21,user:'admin',password:'infopower2016'});
+        c.connect(
+            {
+                host:commonAttribute.FTP_HOST,
+                port:commonAttribute.FTP_PORT,
+                user:commonAttribute.FTP_USER,
+                password:commonAttribute.FTP_PASSWORD
+            }
+        );
     });
 }
 

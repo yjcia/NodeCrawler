@@ -16,6 +16,10 @@ module.exports = Object.freeze({
     CHANNEL_PC:'PC',
     SCREENSHOT_TYPE:'SKU',
     PIC_PATH:"/goodsPic/",
+    FTP_HOST:'101.231.74.130',
+    FTP_PORT:21,
+    FTP_USER:'admin',
+    FTP_PASSWORD:'infopower2016',
     GOODS_INSERT_COLUMN:'cust_keyword_id,goodsId,' +
     'egoodsId,message,platform_goods_name,' +
     'platform_name_en,platform_category,' +
