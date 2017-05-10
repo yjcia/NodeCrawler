@@ -9,10 +9,11 @@ var request = require('request');
 var log4js = require('log4js');
 var moment = require('moment');
 var async = require('async');
+var validator = require('validator');
 var stringUtil = require('./util/StringUtil');
 var mysqlUtil = require('./util/DbUtil');
 var commonAttribute = require('./common/const.js');
-
+var webshot = require('webshot');
 //log4js config
 log4js.configure({
     appenders:[
@@ -43,9 +44,15 @@ function start_crawler(crawlUrl){
                             },
                             function(callback) {
                                 callback(analysisGoodsPriceInfo($,batchTime,item),'analysisGoodsPriceInfo');
+                            },
+                            function(callback){
+                                callback(analysisGoodsPicInfo($,item),'analysisGoodsPicUrlInfo');
+                            },
+                            function(callback){
+                                callback(analysisScreenshot(crawlerUrl,batchTime,item),'analysisGoodsScreenshot');
                             }
                         ],function(err, results){
-                            log.debug('finish : ' + results);
+                            log.debug('finish:' + results);
                         });
                     });
                 });
@@ -140,4 +147,62 @@ function analysisGoodsPriceInfo($,batchTime,item){
         }
     });
 }
+
+function analysisGoodsPicInfo($,item){
+    var goodsPicUrl = '';
+    var imgSrc = $('div[id=imgTagWrapperId]').children('img').attr('src');
+    var imgHiresSrc = $('div[id=imgTagWrapperId]').children('img').attr('data-old-hires');
+    var imgDynamicImageSrc =  $('div[id=imgTagWrapperId]').children('img').attr('data-a-dynamic-image');
+    if(validator.contains(imgSrc,'.png') || validator.contains(imgSrc,'.jpg')){
+        goodsPicUrl = imgSrc;
+    }else if(validator.contains(imgHiresSrc,'.png') || validator.contains(imgHiresSrc,'.jpg')){
+        goodsPicUrl = imgHiresSrc;
+    }else{
+        goodsPicUrl = "https:" + imgDynamicImageSrc.split(":")[1].split("\"")[0];
+    }
+    mysqlUtil.updateGoodsInfoPic(goodsPicUrl,item.cust_keyword_id,function(data){
+        if(data.error == null){
+            var result = data.result;
+            log.debug("update goods url info : " + result);
+        } else{
+            log.error(data.error);
+        }
+    });
+}
+
+function analysisScreenshot(crawlerUrl,batchTime,item){
+    var goodsId = stringUtil.encodeMD5(item.cust_keyword_id + commonAttribute.PLATFORM_NAME);
+    var screenshotUrl = "/" + commonAttribute.PLATFORM_NAME + "/" + commonAttribute.ACCOUNT_ID + commonAttribute.PIC_PATH
+        + moment().format(commonAttribute.DATETIME_FORMAT) + "/" + commonAttribute.CHANNEL_PC + "/" +
+        item.cust_keyword_name +".png";
+    var tempFilePath = "d:/uploadImg/" + goodsId + "_" + moment().format(commonAttribute.DATETIME_FORMAT2) + ".png";
+    var screenshot = {
+        custAccountId:commonAttribute.ACCOUNT_ID,
+        screenshotType:commonAttribute.SCREENSHOT_TYPE,
+        screenshotId:goodsId,
+        skuId:'',
+        screenshotUrl:screenshotUrl,
+        updateTime:moment().format(commonAttribute.DATETIME_FORMAT),
+        updateDate:moment().format(commonAttribute.DATE_FORMAT),
+        batchTime:batchTime,
+        screenshotTime:moment().format(commonAttribute.DATETIME_FORMAT),
+        channel:commonAttribute.CHANNEL_PC
+    };
+    mysqlUtil.insertScreenshotInfo(screenshot,function(data){
+        if(data.error == null){
+            var result = data.result;
+            log.debug("save goods screenshot info : " + result);
+        } else{
+            log.error(data.error);
+        }
+    });
+    var options = {
+        screenSize: {width: 1366, height: 768},
+        shotSize: {width: 500, height:400}
+    };
+    webshot(crawlerUrl, tempFilePath, options, function(err) {
+        // screenshot now saved to flickr.jpeg
+    });
+}
+
 start_crawler(commonAttribute.AMAZON_URL);

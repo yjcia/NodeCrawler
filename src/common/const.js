@@ -11,8 +11,11 @@ module.exports = Object.freeze({
     AMAZON_SHOP_ID:'5',
     AMAZON_SHOP_TYPE:'自营',
     DATETIME_FORMAT:'YYYY-MM-DD HH:mm:ss',
+    DATETIME_FORMAT2:'YYYYMMDDHHmmss',
     DATE_FORMAT:'YYYY-MM-DD',
     CHANNEL_PC:'PC',
+    SCREENSHOT_TYPE:'SKU',
+    PIC_PATH:"/goodsPic/",
     GOODS_INSERT_COLUMN:'cust_keyword_id,goodsId,' +
     'egoodsId,message,platform_goods_name,' +
     'platform_name_en,platform_category,' +
@@ -28,5 +31,9 @@ module.exports = Object.freeze({
     PRICE_INSERT_COLUMN:'cust_keyword_id,' +
     'goodsid,SKUid,channel,original_price,' +
     'current_price,promotion,update_time,' +
-    'update_date,batch_time,carnival_price,head_promotion'
+    'update_date,batch_time,carnival_price,head_promotion',
+    SCREENSHOT_COLUMN:'cust_account_id,screenshot_type, ' +
+    'screenshot_id, skuid, screenshot_url, ' +
+    'update_time, update_date, screenshot_time, ' +
+    'batch_time, channel'
 });

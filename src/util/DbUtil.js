@@ -37,7 +37,7 @@ exports.saveGoodsInfo = function(goodsInfo,callback){
     var insertSql = sqlStr.replace('#paramLocation',tempStr);
     connection.query({
         sql: insertSql,
-        timeout: 2000,
+        timeout: 10000,
         values: [
             goodsInfo.custKeywordId,
             goodsInfo.goodsId,
@@ -92,7 +92,7 @@ exports.saveGoodsPriceInfo = function(goodsPriceInfo,callback){
     var insertSql = sqlStr.replace('#paramLocation',tempStr);
     connection.query({
         sql: insertSql,
-        timeout: 2000,
+        timeout: 20000,
         values: [
             goodsPriceInfo.custKeywordId,
             goodsPriceInfo.goodsId,
@@ -106,6 +106,57 @@ exports.saveGoodsPriceInfo = function(goodsPriceInfo,callback){
             goodsPriceInfo.batchTime,
             goodsPriceInfo.carnivalPrice,
             goodsPriceInfo.headPromotion
+        ]
+    }, function (error, results, fields) {
+        if (error) {
+            callback({'error': error});
+        }
+        if(results.length > 0){
+            callback({'result': results});
+        }
+    });
+};
+
+exports.updateGoodsInfoPic = function(goodsPicUrl,custKeywordId,callback){
+    var updateSqlStr = "update craw_goods_info set goods_pic_url = ? where cust_keyword_id = ?";
+    connection.query({
+        sql: updateSqlStr,
+        timeout: 20000,
+        values: [goodsPicUrl,custKeywordId]
+    }, function (error, results, fields) {
+        if (error) {
+            callback({'error': error});
+        }
+        if(results.length > 0){
+            callback({'result': results});
+        }
+    });
+};
+
+exports.insertScreenshotInfo = function(screenshotInfo,callback){
+    var sqlStr = "insert into craw_screenshot_info (" + commonAttribute.SCREENSHOT_COLUMN + ") values (#paramLocation)";
+    var insertValueArr = commonAttribute.SCREENSHOT_COLUMN.split(',');
+    var tempStr = '';
+    for(var i = 0;i < insertValueArr.length; i++){
+        tempStr += '?,';
+    }
+    tempStr = tempStr.substr(0,tempStr.length - 1);
+    var insertSql = sqlStr.replace('#paramLocation',tempStr);
+    connection.query({
+        sql: insertSql,
+        timeout: 20000,
+        values: [
+            screenshotInfo.custAccountId,
+            screenshotInfo.screenshotType,
+            screenshotInfo.screenshotId,
+            screenshotInfo.skuId,
+            screenshotInfo.screenshotUrl,
+            screenshotInfo.updateTime,
+            screenshotInfo.updateDate,
+            screenshotInfo.screenshotTime,
+            screenshotInfo.batchTime,
+            screenshotInfo.channel
+
         ]
     }, function (error, results, fields) {
         if (error) {
