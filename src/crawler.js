@@ -14,6 +14,7 @@ var stringUtil = require('./util/StringUtil');
 var mysqlUtil = require('./util/DbUtil');
 var commonAttribute = require('./common/const.js');
 var webshot = require('webshot');
+var ftpClient = require('ftp');
 //log4js config
 log4js.configure({
     appenders:[
@@ -30,6 +31,9 @@ function start_crawler(crawlUrl){
             var batchTime = moment().format(commonAttribute.DATETIME_FORMAT);
             result.forEach(function(item,index){
                 var crawlerUrl = crawlUrl + item.cust_keyword_name;
+                setTimeout(function() {
+
+                }, 2000);
                 https.get(crawlerUrl,function(response){
                     var html = '';
                     response.setEncoding(commonAttribute.UTF8_ENCODING);
@@ -115,7 +119,6 @@ function analysisGoodsInfo($,crawlerUrl,batchTime,item){
             log.error(data.error);
         }
     });
-
 }
 
 function analysisGoodsPriceInfo($,batchTime,item){
@@ -173,9 +176,11 @@ function analysisGoodsPicInfo($,item){
 function analysisScreenshot(crawlerUrl,batchTime,item){
     var goodsId = stringUtil.encodeMD5(item.cust_keyword_id + commonAttribute.PLATFORM_NAME);
     var screenshotUrl = "/" + commonAttribute.PLATFORM_NAME + "/" + commonAttribute.ACCOUNT_ID + commonAttribute.PIC_PATH
-        + moment().format(commonAttribute.DATETIME_FORMAT) + "/" + commonAttribute.CHANNEL_PC + "/" +
+        + moment().format(commonAttribute.DATETIME_FORMAT2) + "/" + commonAttribute.CHANNEL_PC + "/" +
         item.cust_keyword_name +".png";
-    var tempFilePath = "d:/uploadImg/" + goodsId + "_" + moment().format(commonAttribute.DATETIME_FORMAT2) + ".png";
+    var screenshotUrlPath = "/" + commonAttribute.PLATFORM_NAME + "/" + commonAttribute.ACCOUNT_ID + commonAttribute.PIC_PATH
+        + moment().format(commonAttribute.DATETIME_FORMAT2) + "/" + commonAttribute.CHANNEL_PC + "/";
+    var tempFilePath = "d:\\uploadImg\\" + goodsId + "_" + moment().format(commonAttribute.DATETIME_FORMAT2) + ".png";
     var screenshot = {
         custAccountId:commonAttribute.ACCOUNT_ID,
         screenshotType:commonAttribute.SCREENSHOT_TYPE,
@@ -198,10 +203,33 @@ function analysisScreenshot(crawlerUrl,batchTime,item){
     });
     var options = {
         screenSize: {width: 1366, height: 768},
-        shotSize: {width: 500, height:400}
+        shotSize: {width: 1000, height:600},
+        customHeaders: {
+            'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+            'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36',
+            'Host':'aax-eu.amazon-adsystem.com',
+            'Accept':'*/*',
+            'Connection':'keep-alive',
+            'Cookie':'ad-id=A6NjLGuzrETDme5V7TVf3as; ad-privacy=0'
+        }
+
     };
-    webshot(crawlerUrl, tempFilePath, options, function(err) {
-        // screenshot now saved to flickr.jpeg
+    webshot(crawlerUrl, tempFilePath, options, function(webshot) {
+        var c = new ftpClient();
+        c.on('ready',function() {
+            c.get(screenshotUrlPath,function(err){
+                if(err){
+                    c.mkdir(screenshotUrlPath,true,function(error){
+                        if (error) throw error;
+                        c.put(tempFilePath, screenshotUrl,function(err) {
+                            if (err) throw err;
+                            c.end();
+                        });
+                    });
+                }
+            });
+        });
+        c.connect({host:'101.231.74.130',port:21,user:'admin',password:'infopower2016'});
     });
 }
 
